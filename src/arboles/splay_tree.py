@@ -1,52 +1,97 @@
+from modelos.nodo import Nodo
+
 class SplayTree:
     def __init__(self):
-        # La raiz del arbol inicia vacia al crear la estructura
         self.raiz = None
-        
-    def splay(self, nodo):
-        # Pendiente 
-        pass
-        
+
+    def rotar_derecha(self, x):
+        y = x.izquierdo
+        x.izquierdo = y.derecho
+        if y.derecho is not None:
+            y.derecho.padre = x
+        y.padre = x.padre
+        if x.padre is None:
+            self.raiz = y
+        elif x == x.padre.derecho:
+            x.padre.derecho = y
+        else:
+            x.padre.izquierdo = y
+        y.derecho = x
+        x.padre = y
+
+    def rotar_izquierda(self, x):
+        y = x.derecho
+        x.derecho = y.izquierdo
+        if y.izquierdo is not None:
+            y.izquierdo.padre = x
+        y.padre = x.padre
+        if x.padre is None:
+            self.raiz = y
+        elif x == x.padre.izquierdo:
+            x.padre.izquierdo = y
+        else:
+            x.padre.derecho = y
+        y.izquierdo = x
+        x.padre = y
+
+    def splay(self, n):
+        while n.padre is not None:
+            if n.padre.padre is None:
+                if n == n.padre.izquierdo:
+                    self.rotar_derecha(n.padre)
+                else:
+                    self.rotar_izquierda(n.padre)
+            elif n == n.padre.izquierdo and n.padre == n.padre.padre.izquierdo:
+                self.rotar_derecha(n.padre.padre)
+                self.rotar_derecha(n.padre)
+            elif n == n.padre.derecho and n.padre == n.padre.padre.derecho:
+                self.rotar_izquierda(n.padre.padre)
+                self.rotar_izquierda(n.padre)
+            elif n == n.padre.derecho and n.padre == n.padre.padre.izquierdo:
+                self.rotar_izquierda(n.padre)
+                self.rotar_derecha(n.padre)
+            else:
+                self.rotar_derecha(n.padre)
+                self.rotar_izquierda(n.padre)
+
     def insertar(self, proceso):
-        # Pendiente 
-        pass
-        
+        nuevo_nodo = Nodo(proceso)
+        y = None
+        x = self.raiz
+
+        while x is not None:
+            y = x
+            if nuevo_nodo.proceso.vruntime < x.proceso.vruntime:
+                x = x.izquierdo
+            else:
+                x = x.derecho
+
+        nuevo_nodo.padre = y
+        if y is None:
+            self.raiz = nuevo_nodo
+        elif nuevo_nodo.proceso.vruntime < y.proceso.vruntime:
+            y.izquierdo = nuevo_nodo
+        else:
+            y.derecho = nuevo_nodo
+
+        self.splay(nuevo_nodo)
+
     def buscar(self, vruntime):
-    
-        # Busca un proceso en el arbol por su vruntime.
-        # Al encontrarlo, se ejecuta la operacion splay para llevar dicho nodo a la raiz.
-        # Devuelve: (Nodo encontrado o None, cantidad de iteraciones)
-    
         nodo_actual = self.raiz
         iteraciones = 0
-        
+        ultimo_visitado = None
+
         while nodo_actual is not None:
-            
-            # Por cada comparacion, se suma un paso
             iteraciones += 1
-            
+            ultimo_visitado = nodo_actual
             if vruntime == nodo_actual.proceso.vruntime:
-                # Se encontro el nodo exacto
-                # Aqui se llamará a splay (nodo_actual) en el futuro
+                self.splay(nodo_actual)
                 return nodo_actual, iteraciones
-                
             elif vruntime < nodo_actual.proceso.vruntime:
-                # Si se tiene que ir a la izquierda pero no hay nada, se llega al final
-                if nodo_actual.izquierdo is None:
-                    # se hace splay al ultimo nodo que logramos visitar
-                    return None, iteraciones
-                
-                # Si hay camino, se sigue bajando a la izquierda
                 nodo_actual = nodo_actual.izquierdo
-                
             else:
-                # Si se tiene que ir a la derecha pero no hay nada, llegamos al final
-                if nodo_actual.derecho is None:
-                    # se hará splay al ultimo nodo que logramos visitar
-                    return None, iteraciones
-                
-                # Si hay camino, se sigue bajando a la derecha
                 nodo_actual = nodo_actual.derecho
-                
-        # Retorno de seguridad por si el arbol esta vacio desde el inicio
+
+        if ultimo_visitado is not None:
+            self.splay(ultimo_visitado)
         return None, iteraciones

@@ -19,5 +19,4 @@ def main():
     print(f"El proceso {nodo_prueba.proceso.pid} tiene un vruntime de {nodo_prueba.proceso.vruntime}")
     print("Los archivos se comunican de forma exitosa")
 
-if __name__ == "__main__":
-    main()
+main()
